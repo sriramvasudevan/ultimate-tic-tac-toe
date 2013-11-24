@@ -69,15 +69,77 @@ def other(t):
     if t == 1:
         return 2
     return 1
+
+def TwoOfThree(tl, which):
+    """Returns true if 2 of the three elements in threelist are which, and the third is 0."""
+    return tl.count(which) == 2 and tl.count(0) == 1
+    
+def AlmostWonCount(board,x,y):    
+    """If 2 out of 3 in any row, column or diagonal are ours, and the third is blank, add. Do the same
+        for the opponent. Return (number of ours - number of theirs) found.
+    """
+
+    toReturn = 0
+    sb = board[x][y]
+    #Define threelists and keep sending.
+    #Verticals
+    tl = [sb[0][0],sb[1][0],sb[2][0]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    tl = [sb[0][1],sb[1][1],sb[2][1]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    tl = [sb[0][2],sb[1][2],sb[2][2]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+
+    #Horizontals.
+    tl = [sb[0][0],sb[0][1],sb[0][2]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    tl = [sb[1][0],sb[1][1],sb[1][2]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    tl = [sb[2][0],sb[2][1],sb[2][2]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    #Diagonals.
+    tl = [sb[0][0],sb[1][1],sb[2][2]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+    tl = [sb[0][2],sb[1][1],sb[2][0]]
+    if TwoOfThree(tl,turn):
+        toReturn += 1
+    if TwoOfThree(tl,other(turn)):
+        toReturn -= 1
+
+    print toReturn
+    return toReturn 
     
 #Subevaluation functions. Board is a 4-D array.
 
 #Bonus for winning subboards.
+#Returns the boards that haven't been won for the use of the remaining sub-eval functions.
 def WonSubBoards(board):
     
     #The weight for this.
     WONSB_BONUS = 10
     toReturn = 0
+    notwonlist = []
     for i in range(3):
         for j in range(3):
             temp = WhoseSubBoard(board,i,j)
@@ -85,13 +147,27 @@ def WonSubBoards(board):
                 toReturn += WONSB_BONUS
             elif temp == other(turn):
                 toReturn -= WONSB_BONUS
+            else:
+                notwonlist.append([i,j])
+
+    return (toReturn,notwonlist)
+
+def AlmostWonSubBoards(board,notwonlist):
+
+    #The weight for this.
+    ALMOSTWONSB_BONUS = 3
+    toReturn = 0
+    for sb in notwonlist:
+        toReturn += ALMOSTWONSB_BONUS*AlmostWonCount(board,sb[0],sb[1])
     return toReturn
 
 #Evaluation function.
 def Evaluate(board):
     
     toReturn = 0
-    toReturn += WonSubBoards(board)
+    (wsb,notwonlist) = WonSubBoards(board)
+    toReturn += wsb
+    toReturn += AlmostWonSubBoards(board,notwonlist)
 
     return toReturn
 
@@ -107,6 +183,7 @@ def GetEmptySquares(x,y):
     return toReturn
 
 def GetValidMoves():
+
     if playanywhere:
         toReturn = []
         for i in range(3):
