@@ -1,4 +1,4 @@
-function TicTacToe(ai) {
+function TicTacToe() {
     // drawing variables
     this.canvas = $("#board").get(0);
     this.context = this.canvas.getContext("2d");
@@ -26,7 +26,6 @@ function TicTacToe(ai) {
     // the next board that the player has to play in, i.e. [0,0] = top left square
     this.nextBoard = null; //[1,1]; 
     this.useAI = false;
-    this.ai = ai;
     this.state = 	
         [
         [[[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]]],
@@ -319,8 +318,21 @@ function TicTacToe(ai) {
         }
     }
 
+
+    this.solve = function(nextBoard) {
+        alert(nextBoard);
+        $.ajax({
+          url: "demo.txt",
+          async: false,
+          cache: false
+        }).done(function(data) {
+            alert(data);
+        });
+        return [0, 0, 1, 1];
+    }
+
     this.aiGo = function() {
-        var move = this.ai.solve(this.nextBoard);
+        var move = this.solve(this.nextBoard);
         this.nextBoard = [move[0], move[1]];
         this.go(move[2], move[3]);
 
