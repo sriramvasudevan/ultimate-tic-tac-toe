@@ -26,6 +26,7 @@ function TicTacToe() {
     // the next board that the player has to play in, i.e. [0,0] = top left square
     this.nextBoard = null; //[1,1]; 
     this.useAI = false;
+    this.difficulty = 0;
     this.state = 	
         [
         [[[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]]],
@@ -318,6 +319,20 @@ function TicTacToe() {
         }
     }
 
+    this.toggleDifficulty = function() {
+        if(this.difficulty==0) {
+            $("#toggle_difficulty").attr("value", "Professional");
+            this.difficulty = 1;
+        } else if(this.difficulty==1) {
+            $("#toggle_difficulty").attr("value", "Legendary");
+            this.difficulty = 2;
+        }
+        else {
+            $("#toggle_difficulty").attr("value", "Amateur");
+            this.difficulty = 0;
+        }
+    }
+
     this.solve = function(nextBoard) {
         var retval = [0,0,1,1];
         $.ajax({
@@ -327,6 +342,7 @@ function TicTacToe() {
               gameOver: this.gameOver,
               state: this.state,
               wins: this.wins,
+              difficulty: this.difficulty,
               nextBoard: this.nextBoard
           },
           async: false,
