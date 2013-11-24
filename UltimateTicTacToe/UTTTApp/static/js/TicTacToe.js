@@ -77,6 +77,10 @@ function TicTacToe() {
         // this.line(x+w-8, y + 8, x + w-8, y + h-8);
     }
 
+    this.isWon = function(subboard_coords) {
+        return this.wins[subboard_coords[0]][subboard_coords[1]];
+    }
+
     this.getCurrentSubBoard = function() {
         return this.state[this.nextBoard[0]][this.nextBoard[1]];
     }
@@ -365,6 +369,16 @@ function TicTacToe() {
             $("#msg").html("&nbsp;");
         }
         this.switchTurns();		
+        //account for all filled subboards
+        if(this.isSubBoardFull(this.state[0][0])&&this.isSubBoardFull(this.state[0][1])&&this.isSubBoardFull(this.state[0][2])&&this.isSubBoardFull(this.state[1][0])&&this.isSubBoardFull(this.state[1][1])&&this.isSubBoardFull(this.state[1][2])&&this.isSubBoardFull(this.state[2][0])&&this.isSubBoardFull(this.state[2][1])&&this.isSubBoardFull(this.state[2][2])) {
+            if(parseInt($("#score1").html())>parseInt($("#score2").html())) {
+                $("#turn").html("X Wins!");
+            }
+            else {
+                $("#turn").html("O Wins!");
+            }
+            this.gameOver = true;
+        }
         // account for filled squares
         if(this.nextBoard != null && this.isSubBoardFull(this.getCurrentSubBoard())) {
             this.nextBoard = null;
@@ -376,6 +390,7 @@ function TicTacToe() {
         if(!this.gameOver) {
             var moved = this.move(x, y);
             if(moved) {
+                //account for all filled subboards
                 if(this.isSubBoardFull(this.state[0][0])&&this.isSubBoardFull(this.state[0][1])&&this.isSubBoardFull(this.state[0][2])&&this.isSubBoardFull(this.state[1][0])&&this.isSubBoardFull(this.state[1][1])&&this.isSubBoardFull(this.state[1][2])&&this.isSubBoardFull(this.state[2][0])&&this.isSubBoardFull(this.state[2][1])&&this.isSubBoardFull(this.state[2][2])) {
                     if(parseInt($("#score1").html())>parseInt($("#score2").html())) {
                         $("#turn").html("X Wins!");
@@ -386,7 +401,9 @@ function TicTacToe() {
                     this.gameOver = true;
                 }
                 // account for filled squares
-                if(this.nextBoard != null && this.isSubBoardFull(this.getCurrentSubBoard())) {
+                // the isWon() gets rid of the gambit possibility,
+                // a version of the game that allows X to play perfectly.
+                if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard())||this.isWon(this.nextBoard))) {
                     this.nextBoard = null;
                 }
                 this.highlightBoard();
