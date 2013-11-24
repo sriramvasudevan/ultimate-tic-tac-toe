@@ -321,7 +321,7 @@ function TicTacToe() {
     this.solve = function(nextBoard) {
         var retval = [0,0,1,1];
         $.ajax({
-          url: "getmoves.html",
+          url: "getmove.html",
           async: false,
           cache: false
         }).done(function(result) {
