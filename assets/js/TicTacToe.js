@@ -318,17 +318,19 @@ function TicTacToe() {
         }
     }
 
-
     this.solve = function(nextBoard) {
-        alert(nextBoard);
+        var retval = [0,0,1,1];
         $.ajax({
-          url: "demo.txt",
+          url: "getmoves.html",
           async: false,
           cache: false
-        }).done(function(data) {
-            alert(data);
+        }).done(function(result) {
+            result = result.split(",");
+            for(var i=0; i<result.length; i++) {
+                retval[i] = parseInt(result[i]);
+            }
         });
-        return [0, 0, 1, 1];
+        return retval;
     }
 
     this.aiGo = function() {
