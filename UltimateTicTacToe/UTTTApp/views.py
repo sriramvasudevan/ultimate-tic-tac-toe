@@ -127,7 +127,7 @@ def AlmostWonCount(board,x,y):
     if TwoOfThree(tl,other(turn)):
         toReturn -= 1
 
-    print toReturn
+    # print toReturn
     return toReturn 
     
 #Subevaluation functions. Board is a 4-D array.
