@@ -184,6 +184,7 @@ def GetEmptySquares(x,y):
 
 def GetValidMoves():
 
+    global playanywhere
     if playanywhere:
         toReturn = []
         for i in range(3):
@@ -204,7 +205,7 @@ def Professional():
     """The professional difficulty. Just evaluates, no lookahead."""
     ValidMoves = GetValidMoves()
     highest = -LARGE
-    bestmove = ValidMoves[0]
+    bestmove = None
     for move in ValidMoves:
         newboard = copy.deepcopy(state) 
         newboard[move[0]][move[1]][move[2]][move[3]] = turn
@@ -234,8 +235,9 @@ def getMove(request):
     global state
     global wins
     global nextboard
+    global playanywhere
     turn = request.GET["turn"]
-    if request.GET.getlist("nextBoard[]") == []:
+    if "nextBoard[]" not in request.GET.keys():
         playanywhere = True
     else:
         nextboard = ([int(a) for a in request.GET.getlist("nextBoard[]")])
