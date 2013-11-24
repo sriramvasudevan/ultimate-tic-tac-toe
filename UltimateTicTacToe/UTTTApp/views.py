@@ -127,7 +127,7 @@ def Professional():
     """The professional difficulty. Just evaluates, no lookahead."""
     ValidMoves = GetValidMoves()
     highest = -LARGE
-    bestmove = None
+    bestmove = ValidMoves[0]
     for move in ValidMoves:
         newboard = copy.deepcopy(state) 
         newboard[move[0]][move[1]][move[2]][move[3]] = turn
@@ -158,7 +158,7 @@ def getMove(request):
     global wins
     global nextboard
     turn = request.GET["turn"]
-    if request.GET["nextBoard[]"] == 'null':
+    if request.GET.getlist("nextBoard[]") == []:
         playanywhere = True
     else:
         nextboard = ([int(a) for a in request.GET.getlist("nextBoard[]")])

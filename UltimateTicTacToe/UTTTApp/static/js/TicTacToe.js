@@ -380,7 +380,7 @@ function TicTacToe() {
             this.gameOver = true;
         }
         // account for filled squares
-        if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard())||this.isWon(this.nextBoard))) {
+        if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard()))) {
             this.nextBoard = null;
         }
         this.highlightBoard();
