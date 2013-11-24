@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from UTTTApp import views
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,7 +9,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'UltimateTicTacToe.views.home', name='home'),
     # url(r'^UltimateTicTacToe/', include('UltimateTicTacToe.foo.urls')),
-    url(r'^$', include('UTTTApp.urls')),
+    url(r'^', include('UTTTApp.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
