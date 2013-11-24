@@ -320,7 +320,7 @@ function TicTacToe(ai) {
     }
 
     this.aiGo = function() {
-        var move = this.ai.solve(this);
+        var move = this.ai.solve(this.nextBoard);
         this.nextBoard = [move[0], move[1]];
         this.go(move[2], move[3]);
 
