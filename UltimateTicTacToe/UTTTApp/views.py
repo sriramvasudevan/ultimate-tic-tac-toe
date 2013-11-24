@@ -253,18 +253,27 @@ def GetValidMoves():
     else:
         return GetEmptySquares(nextboard[0],nextboard[1])
 
+def GetEmptySquares_AB(board,x,y):
+
+    toReturn = []
+    for i in range(3):
+        for j in range(3):
+            if board[x][y][i][j] == 0:
+                toReturn.append([x,y,i,j])
+    return toReturn
+
 #Defining a separate GetValidMoves() for AB, because it's faster.
 #Add the play_anywhere and shit here.
-def GetValidMoves_AB(next_board,play_anywhere):
+def GetValidMoves_AB(board,next_board):
     
-    if play_anywhere:
+    if WhoseSubBoard(board,next_board[0],nextboard[1]) != 0:
         toReturn = []
         for i in range(3):
             for j in range(3):
-                toReturn.extend(GetEmptySquares(i,j))
+                toReturn.extend(GetEmptySquares_AB(board,i,j))
         return toReturn
     else:
-        return GetEmptySquares(next_board[0],next_board[1])
+        return GetEmptySquares_AB(board,next_board[0],next_board[1])
 
 def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
 
@@ -279,7 +288,7 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
 
     bestmove = None
     if ourturn:
-        moves = GetValidMoves_AB(nboard,False)
+        moves = GetValidMoves_AB(board,nboard)
         for move in moves:
             newboard = copy.deepcopy(board)
             newboard[move[0]][move[1]][move[2]][move[3]] = turn
@@ -292,7 +301,7 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
                 return beta
         return alpha
     else:
-        moves = GetValidMoves_AB(nboard,False)
+        moves = GetValidMoves_AB(board,nboard)
         for move in moves:
             newboard = copy.deepcopy(board)
             newboard[move[0]][move[1]][move[2]][move[3]] = other(turn)
@@ -334,7 +343,7 @@ def Legendary():
     alpha = -LARGE
     beta = LARGE
     bestmove = None
-    INITIAL_DEPTH = 6
+    INITIAL_DEPTH = 5
     for move in ValidMoves:
         newboard = copy.deepcopy(state)
         newboard[move[0]][move[1]][move[2]][move[3]] = turn       
