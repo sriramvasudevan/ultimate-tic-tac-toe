@@ -362,7 +362,7 @@ function TicTacToe() {
         this.go(move[2], move[3]);
 
         if(!this.gameOver) {
-            $("#msg").html("");
+            $("#msg").html("&nbsp;");
         }
         this.switchTurns();		
         // account for filled squares
@@ -391,7 +391,7 @@ function TicTacToe() {
                 }
                 this.highlightBoard();
                 if(!this.gameOver) {
-                    $("#msg").html("");
+                    $("#msg").html("&nbsp;");
                     this.switchTurns();
                 }
                 if(this.useAI && !this.gameOver) {
