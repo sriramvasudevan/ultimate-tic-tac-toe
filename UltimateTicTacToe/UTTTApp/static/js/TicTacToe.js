@@ -226,43 +226,43 @@ function TicTacToe() {
             cxt = $("#board").get(0).getContext("2d");
             cxt.strokeStyle = "#CE0000";
         }
-        if(board[0][0] == turn && board[1][0] == turn && board[2][0] == turn) {
+        if(this.wins[x][y]==0 && board[0][0] == turn && board[1][0] == turn && board[2][0] == turn) {
             this.line(dX+12, dY + (h/3-8)/2+8, dX + w-12, dY + (h/3-8)/2+8);
             this.wins[x][y] = turn;
         }
-        if(board[0][1] == turn && board[1][1] == turn && board[2][1] == turn) {
+        if(this.wins[x][y]==0 && board[0][1] == turn && board[1][1] == turn && board[2][1] == turn) {
             this.line(dX+12, dY + ((h/3-8)/2+h/3-4)+8, dX + w-12, dY + ((h/3-8)/2+h/3-4)+8);
             this.wins[x][y] = turn;
         }
-        if(board[0][2] == turn && board[1][2] == turn && board[2][2] == turn) {
+        if(this.wins[x][y]==0 && board[0][2] == turn && board[1][2] == turn && board[2][2] == turn) {
             this.line(dX+12, dY + ((h/3-8)/2+2/3*h-10)+8, dX + w-12, dY + ((h/3-8)/2+2/3*h-10)+8);
             this.wins[x][y] = turn;
         }
         // vertical
-        if(board[0][0] == turn && board[0][1] == turn && board[0][2] == turn) {
+        if(this.wins[x][y]==0 && board[0][0] == turn && board[0][1] == turn && board[0][2] == turn) {
             this.line(dX+(w/3-8)/2+9, dY+12, dX+(w/3-8)/2+9, dY+h-12);
             this.wins[x][y] = turn;
         }
-        if(board[1][0] == turn && board[1][1] == turn && board[1][2] == turn) {
+        if(this.wins[x][y]==0 && board[1][0] == turn && board[1][1] == turn && board[1][2] == turn) {
             this.line(dX+((w/3-8)/2+(w/3-4))+8, dY+12, dX+((w/3-8)/2+(w/3-4))+8, dY+h-12);
             this.wins[x][y] = turn;
         }
-        if(board[2][0] == turn && board[2][1] == turn && board[2][2] == turn) {
+        if(this.wins[x][y]==0 && board[2][0] == turn && board[2][1] == turn && board[2][2] == turn) {
             this.line(dX+((w/3-8)/2+2/3*w-8)+7, dY+12, dX+((w/3-8)/2+2/3*w-8)+7, dY+h-12);
             this.wins[x][y] = turn;
         }
         // diagonal
-        if(board[0][0] == turn && board[1][1] == turn && board[2][2] == turn) {
+        if(this.wins[x][y]==0 && board[0][0] == turn && board[1][1] == turn && board[2][2] == turn) {
             this.line(dX+12, dY+12, dX+w-12, dY+h-12);
             this.wins[x][y] = turn;
         }
-        if(board[2][0] == turn && board[1][1] == turn && board[0][2] == turn) {
+        if(this.wins[x][y]==0 && board[2][0] == turn && board[1][1] == turn && board[0][2] == turn) {
             this.line(dX+12, dY+h-12, dX+w-12, dY+12);
             this.wins[x][y] = turn;
         }
 
         if(this.wins[x][y] > 0) {
-            $("#score_" + turn).html(parseInt($("#score_" + turn).html()) + 1);
+            $("#score" + turn).html(parseInt($("#score" + turn).html()) + 1);
         }
 
         // global wins
@@ -312,9 +312,9 @@ function TicTacToe() {
     this.toggleAI = function() {
         this.useAI = !this.useAI;
         if(this.useAI) {
-            $("#toggle_ai").attr("value", "A.I.");
+            $("#toggle_ai").attr("value", "1 vs AI");
         } else {
-            $("#toggle_ai").attr("value", "Human");
+            $("#toggle_ai").attr("value", "1 vs 1");
         }
     }
 
@@ -360,6 +360,15 @@ function TicTacToe() {
         if(!this.gameOver) {
             var moved = this.move(x, y);
             if(moved) {
+                if(this.isSubBoardFull(this.state[0][0])&&this.isSubBoardFull(this.state[0][1])&&this.isSubBoardFull(this.state[0][2])&&this.isSubBoardFull(this.state[1][0])&&this.isSubBoardFull(this.state[1][1])&&this.isSubBoardFull(this.state[1][2])&&this.isSubBoardFull(this.state[2][0])&&this.isSubBoardFull(this.state[2][1])&&this.isSubBoardFull(this.state[2][2])) {
+                    if(parseInt($("#score1").html())>parseInt($("#score2").html())) {
+                        $("#turn").html("X Wins!");
+                    }
+                    else {
+                        $("#turn").html("O Wins!");
+                    }
+                    this.gameOver = true;
+                }
                 // account for filled squares
                 if(this.nextBoard != null && this.isSubBoardFull(this.getCurrentSubBoard())) {
                     this.nextBoard = null;
