@@ -217,6 +217,26 @@ def Professional():
     toReturn = str(bestmove[0]) + ',' + str(bestmove[1]) + ',' + str(bestmove[2]) + ',' + str(bestmove[3])
     return HttpResponse(toReturn)
 
+def Legendary():
+    """The legendary difficulty. Give up, humans."""
+    ValidMoves = GetValidMoves()
+    alpha = -LARGE
+    beta = LARGE
+    bestmove = None
+    for move in ValidMoves:
+        newboard = copy.deepcopy(state)
+        newboard[move[0]][move[1]][move[2]][move[3]] = turn       
+        value = AlphaBeta(newboard,alpha,beta,False)
+        if value > alpha:
+            alpha = value
+            bestmove = move
+        del newboard
+
+    toReturn = str(bestmove[0]) + ',' + str(bestmove[1]) + ',' + str(bestmove[2]) + ',' + str(bestmove[3])
+    return HttpResponse(toReturn)
+
+
+
 def home(request):
     return render_to_response('index.html', locals())
 
