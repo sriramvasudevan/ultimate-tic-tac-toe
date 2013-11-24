@@ -322,6 +322,13 @@ function TicTacToe() {
         var retval = [0,0,1,1];
         $.ajax({
           url: "getmove",
+          data: {
+              turn: this.turn,
+              gameOver: this.gameOver,
+              state: this.state,
+              wins: this.wins,
+              nextBoard: this.nextBoard
+          },
           async: false,
           cache: false
         }).done(function(result) {
