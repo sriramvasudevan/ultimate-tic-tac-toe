@@ -152,6 +152,66 @@ def WonSubBoards(board):
 
     return (toReturn,notwonlist)
 
+#Are all 3 elements in threelist = 3?
+def ThreeEqual(threelist,which):
+    assert len(threelist) == 3
+    return threelist.count(which)==3
+
+#Is the game over?
+def IsGameOver(board):
+
+    wonlist = []
+    for i in range(3):
+        wonlist.append([])
+        for j in range(3):
+            wonlist[i].append(WhoseSubBoard(board,i,j))
+    tl = [wonlist[0][0],wonlist[1][0],wonlist[2][0]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+    tl = [wonlist[0][1],wonlist[1][1],wonlist[2][1]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+    tl = [wonlist[0][2],wonlist[1][2],wonlist[2][2]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+
+    #Horizontals.
+    tl = [wonlist[0][0],wonlist[0][1],wonlist[0][2]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+    tl = [wonlist[1][0],wonlist[1][1],wonlist[1][2]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+    tl = [wonlist[2][0],wonlist[2][1],wonlist[2][2]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+
+    #Diagonals.
+    tl = [wonlist[0][0],wonlist[1][1],wonlist[2][2]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+    tl = [wonlist[0][2],wonlist[1][1],wonlist[2][0]]
+    if ThreeEqual(tl,turn):
+        return (True,turn)
+    if ThreeEqual(tl,other(turn)):
+        return (True,other(turn))
+
+    return (False,0)
+
 def AlmostWonSubBoards(board,notwonlist):
 
     #The weight for this.
@@ -168,7 +228,6 @@ def Evaluate(board):
     (wsb,notwonlist) = WonSubBoards(board)
     toReturn += wsb
     toReturn += AlmostWonSubBoards(board,notwonlist)
-
     return toReturn
 
 
@@ -194,6 +253,58 @@ def GetValidMoves():
     else:
         return GetEmptySquares(nextboard[0],nextboard[1])
 
+#Defining a separate GetValidMoves() for AB, because it's faster.
+#Add the play_anywhere and shit here.
+def GetValidMoves_AB(next_board,play_anywhere):
+    
+    if play_anywhere:
+        toReturn = []
+        for i in range(3):
+            for j in range(3):
+                toReturn.extend(GetEmptySquares(i,j))
+        return toReturn
+    else:
+        return GetEmptySquares(next_board[0],next_board[1])
+
+def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
+
+    (gameover,winner) = IsGameOver(board)
+    if gameover:
+        if winner == turn:
+            return LARGE
+        else:
+            return -LARGE
+    if depth == 0:
+        return Evaluate(board)
+
+    bestmove = None
+    if ourturn:
+        moves = GetValidMoves_AB(nboard,False)
+        for move in moves:
+            newboard = copy.deepcopy(board)
+            newboard[move[0]][move[1]][move[2]][move[3]] = turn
+            value = AlphaBeta(newboard,depth-1,alpha,beta,False,[move[2],move[3]])
+            if value > alpha:
+                alpha = value
+                bestmove = move
+
+            if beta <= alpha:
+                return beta
+        return alpha
+    else:
+        moves = GetValidMoves_AB(nboard,False)
+        for move in moves:
+            newboard = copy.deepcopy(board)
+            newboard[move[0]][move[1]][move[2]][move[3]] = other(turn)
+
+            value = AlphaBeta(newboard,depth-1,alpha,beta,True,[move[2],move[3]])
+            if value < beta:
+                beta = value
+                bestmove = move
+            if beta <= alpha:
+                return alpha
+        return beta
+
 def Amateur():
     """The amateur difficulty. Random bot."""
     ValidMoves = GetValidMoves()
@@ -218,15 +329,16 @@ def Professional():
     return HttpResponse(toReturn)
 
 def Legendary():
-    """The legendary difficulty. Give up, humans."""
+    """The legendary difficulty. Succumb, human."""
     ValidMoves = GetValidMoves()
     alpha = -LARGE
     beta = LARGE
     bestmove = None
+    INITIAL_DEPTH = 6
     for move in ValidMoves:
         newboard = copy.deepcopy(state)
         newboard[move[0]][move[1]][move[2]][move[3]] = turn       
-        value = AlphaBeta(newboard,alpha,beta,False)
+        value = AlphaBeta(newboard,INITIAL_DEPTH,alpha,beta,False,[move[2],move[3]])
         if value > alpha:
             alpha = value
             bestmove = move
