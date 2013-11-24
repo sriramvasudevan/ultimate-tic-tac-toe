@@ -26,6 +26,7 @@ function TicTacToe() {
     // the next board that the player has to play in, i.e. [0,0] = top left square
     this.nextBoard = null; //[1,1]; 
     this.useAI = false;
+    this.useGambit = true;
     this.difficulty = 0;
     this.state = 	
         [
@@ -314,6 +315,15 @@ function TicTacToe() {
         return false;
     } 
 
+    this.toggleGambit = function() {
+        this.useGambit = !this.useGambit;
+        if(this.useGambit) {
+            $("#toggle_gambit").attr("value", "Gambit Enabled");
+        } else {
+            $("#toggle_gambit").attr("value", "Gambit Disabled");
+        }
+    }
+
     this.toggleAI = function() {
         this.useAI = !this.useAI;
         if(this.useAI) {
@@ -380,8 +390,15 @@ function TicTacToe() {
             this.gameOver = true;
         }
         // account for filled squares
-        if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard()))) {
-            this.nextBoard = null;
+        if(this.useGambit) {
+            if(this.nextBoard != null && this.isSubBoardFull(this.getCurrentSubBoard())) {
+                this.nextBoard = null;
+            }
+        }
+        else {
+            if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard())||this.isWon(this.nextBoard))) {
+                this.nextBoard = null;
+            }
         }
         this.highlightBoard();
     }
@@ -403,8 +420,15 @@ function TicTacToe() {
                 // account for filled squares
                 // the isWon() gets rid of the gambit possibility,
                 // a version of the game that allows X to play perfectly.
-                if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard())||this.isWon(this.nextBoard))) {
-                    this.nextBoard = null;
+                if(this.useGambit) {
+                    if(this.nextBoard != null && this.isSubBoardFull(this.getCurrentSubBoard())) {
+                        this.nextBoard = null;
+                    }
+                }
+                else {
+                    if(this.nextBoard != null && (this.isSubBoardFull(this.getCurrentSubBoard())||this.isWon(this.nextBoard))) {
+                        this.nextBoard = null;
+                    }
                 }
                 this.highlightBoard();
                 if(!this.gameOver) {
