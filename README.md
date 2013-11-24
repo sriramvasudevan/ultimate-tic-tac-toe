@@ -1,4 +1,4 @@
-ultimate-tic-tac-toe
+Ultimate Tic Tac Toe
 ====================
 
 Bringing Ultimate Tic Tac Toe to the masses, with a user friendly interface.
