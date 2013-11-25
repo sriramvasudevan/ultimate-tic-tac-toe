@@ -137,7 +137,7 @@ def AlmostWonCount(board,x,y):
 def WonSubBoards(board):
     
     #The weight for this.
-    WONSB_BONUS = 10
+    WONSB_BONUS = 20
     toReturn = 0
     notwonlist = []
     for i in range(3):
@@ -266,14 +266,15 @@ def GetEmptySquares_AB(board,x,y):
 #Add the play_anywhere and shit here.
 def GetValidMoves_AB(board,next_board):
     
-    if WhoseSubBoard(board,next_board[0],nextboard[1]) != 0:
+    next_board_valid = GetEmptySquares_AB(board,next_board[0], next_board[1])
+    if len(next_board_valid) == 0 or WhoseSubBoard(board,next_board[0],nextboard[1]) != 0:
         toReturn = []
         for i in range(3):
             for j in range(3):
                 toReturn.extend(GetEmptySquares_AB(board,i,j))
         return toReturn
     else:
-        return GetEmptySquares_AB(board,next_board[0],next_board[1])
+        return next_board_valid
 
 def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
 
@@ -286,7 +287,6 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
     if depth == 0:
         return Evaluate(board)
 
-    bestmove = None
     if ourturn:
         moves = GetValidMoves_AB(board,nboard)
         for move in moves:
@@ -295,7 +295,6 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
             value = AlphaBeta(newboard,depth-1,alpha,beta,False,[move[2],move[3]])
             if value > alpha:
                 alpha = value
-                bestmove = move
 
             if beta <= alpha:
                 return beta
@@ -309,7 +308,6 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
             value = AlphaBeta(newboard,depth-1,alpha,beta,True,[move[2],move[3]])
             if value < beta:
                 beta = value
-                bestmove = move
             if beta <= alpha:
                 return alpha
         return beta
@@ -342,9 +340,21 @@ def Legendary():
     ValidMoves = GetValidMoves()
     alpha = -LARGE
     beta = LARGE
-    bestmove = None
-    INITIAL_DEPTH = 5
+    bestmove = ValidMoves[0]
+    INITIAL_DEPTH = 4
+    i = 0
+
+    #Print statements for eval function.
+    print 'Of board we got'
+    (wsb,notwonlist) = WonSubBoards(state)
+    
+    print WhoseSubBoard(state,0,2)
+    print 'Won sub-boards bonus: ' + str(wsb)
+    print 'Almost won sub-boards bonus: ' + str(AlmostWonSubBoards(state,notwonlist))
+ 
     for move in ValidMoves:
+        i += 1
+        print 'Looked at %d moves' % (i,)
         newboard = copy.deepcopy(state)
         newboard[move[0]][move[1]][move[2]][move[3]] = turn       
         value = AlphaBeta(newboard,INITIAL_DEPTH,alpha,beta,False,[move[2],move[3]])
@@ -353,6 +363,13 @@ def Legendary():
             bestmove = move
         del newboard
 
+    newboard = copy.deepcopy(state)
+    newboard[bestmove[0]][bestmove[1]][bestmove[2]][bestmove[3]] = turn       
+    (wsb,notwonlist) = WonSubBoards(newboard)
+    print 'Of board we send'
+    print 'Won sub-boards bonus: ' + str(wsb)
+    print 'Almost won sub-boards bonus: ' + str(AlmostWonSubBoards(newboard,notwonlist))
+    del newboard
     toReturn = str(bestmove[0]) + ',' + str(bestmove[1]) + ',' + str(bestmove[2]) + ',' + str(bestmove[3])
     return HttpResponse(toReturn)
 
@@ -377,7 +394,7 @@ def getMove(request):
     global wins
     global nextboard
     global playanywhere
-    turn = request.GET["turn"]
+    turn = int(request.GET["turn"])
     if "nextBoard[]" not in request.GET.keys():
         playanywhere = True
     else:
