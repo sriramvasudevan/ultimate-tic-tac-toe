@@ -3,7 +3,7 @@ function TicTacToe() {
     this.canvas = $("#board").get(0);
     this.context = this.canvas.getContext("2d");
 
-    // standard line
+    // line drawing code
     this.line = function(x0, y0, x1, y1) {
         this.context.beginPath();
         this.context.moveTo(x0,y0);
@@ -12,6 +12,7 @@ function TicTacToe() {
         this.context.closePath();
     } 
 
+    // circle drawing code
     this.circle = function(x, y, r, fill) {
         this.context.beginPath();
         this.context.arc(x, y, r, 0, 2 * Math.PI, false);
@@ -22,12 +23,13 @@ function TicTacToe() {
     // game variables
     this.turn = 1;
     this.gameOver = false;
-
-    // the next board that the player has to play in, i.e. [0,0] = top left square
-    this.nextBoard = null; //[1,1]; 
     this.useAI = false;
     this.useGambit = true;
     this.difficulty = 0;
+
+    // the next board that the player has to play in, i.e. [0,0] = top left square
+    this.nextBoard = null;
+    // initial state of the board
     this.state = 	
         [
         [[[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]]],
@@ -35,13 +37,15 @@ function TicTacToe() {
         [[[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0]]]
             ];
 
+    // A 3x3 grid that indicates the winner of a subboard
     this.wins = [[0,0,0],[0,0,0],[0,0,0]];
 
+    // Draws the entire UTTT Board
     this.drawBoard = function() {
         var w = $("#board").width();
         var h = $("#board").height();
 
-        // main board
+        // draws main board
         cxt = $("#board").get(0).getContext("2d");
         cxt.lineWidth = 3;
         this.line(0, h/3, w, h/3);
@@ -50,22 +54,24 @@ function TicTacToe() {
         this.line(2/3*w, 0, 2/3*w, h);
         cxt.lineWidth = 1;
 
-        // sub board
+        // draws 9 subboards
         this.drawSubBoard(0, 0); this.drawSubBoard(w/3, 0); this.drawSubBoard(2/3*w, 0);
         this.drawSubBoard(0, h/3); this.drawSubBoard(w/3, h/3); this.drawSubBoard(2/3*w, h/3);
         this.drawSubBoard(0, 2/3*h); this.drawSubBoard(w/3, 2/3*h); this.drawSubBoard(2/3*w, 2/3*h);
 
-        // border
+        // draws borders in between the 9 subboards
         cxt = $("#board").get(0).getContext("2d");
         cxt.lineWidth = 5;
         cxt.strokeRect(0,0,w,h);
         cxt.lineWidth = 2;
     }
 
+    // Draws a subboard
     this.drawSubBoard = function(x, y) {
         var w = $("#board").width() / 3;
         var h = $("#board").height() / 3;
 
+        // Draws the 4 lines that make up a tic tac toe grid
         this.line(x+8, (y+(h-16)/3)+8, x + w-8, y + ((h-16)/3)+8);
         this.line(x+8, (y+2/3*(h-16))+8, x + w-8, y + (2/3*(h-16))+8);
         this.line(x + ((w-16)/3)+8, y + 8, x + ((w-16)/3)+8, y + h-8);
@@ -78,14 +84,17 @@ function TicTacToe() {
         // this.line(x+w-8, y + 8, x + w-8, y + h-8);
     }
 
+    // Check if a subboard is won, and return the winner of the board
     this.isWon = function(subboard_coords) {
         return this.wins[subboard_coords[0]][subboard_coords[1]];
     }
 
+    //Get the state for a subboard at the nextBoard coords
     this.getCurrentSubBoard = function() {
         return this.state[this.nextBoard[0]][this.nextBoard[1]];
     }
 
+    // Checks if a subboard is full
     this.isSubBoardFull = function(board) {
         if(board == null) {
             return false;
@@ -95,6 +104,7 @@ function TicTacToe() {
             && board[0][2] != 0 && board[1][2] != 0 && board[2][2] != 0
     }
 
+    // Toggles the current player (turn), and modifies the relevant data on the html page
     this.switchTurns = function() {
         if(this.turn == 2) {
             this.turn = 1;
@@ -105,6 +115,7 @@ function TicTacToe() {
         }
     }
 
+    // Check if a move made to (x,y) is in a valid board.
     this.clickedValidBoard = function(x, y) {
         if(this.nextBoard == null) {
             return true;
@@ -112,6 +123,7 @@ function TicTacToe() {
         var w = $("#board").width();
         var h = $("#board").height();
 
+        // Checks whether the (x,y) values lie within the coords that belong to the subboard nextBoard
         if(x > this.nextBoard[0]*w/3 
                 && x < (this.nextBoard[0]+1)*w/3
                 && y > this.nextBoard[1]*h/3 
@@ -121,6 +133,7 @@ function TicTacToe() {
         return false;
     }
 
+    // Get the local coords (ints) for coordinates (x,y) (float, float)
     this.getLocalCoord = function(x, y) {
         var w = $("#board").width() / 3;
         var h = $("#board").height() / 3;
@@ -138,6 +151,7 @@ function TicTacToe() {
         return [lx, ly];
     }
 
+    // Check if the space clicked on is empty
     this.clickedEmptySpace = function(x, y) {
         var lxy = this.getLocalCoord(x, y);
         var lx = lxy[0];
@@ -149,6 +163,7 @@ function TicTacToe() {
         return false;
     }
 
+    // Draws an O
     this.drawO = function(x, y) {
         // var w = ($("#board").width()/3-16)/3;
         // var h = ($("#board").height()/3-16)/3;
@@ -167,6 +182,7 @@ function TicTacToe() {
         this.circle(x + w/2 + 8, y + w/2 + 8, w/2 - 8, false, 5);
     }
 
+    // Draws an X
     this.drawX = function(x, y) {
         var w = ($("#board").width()/3-16)/3;
         var h = ($("#board").height()/3-16)/3;
@@ -180,6 +196,8 @@ function TicTacToe() {
         this.line(x+w, y+16, x+16, y+h);
     }
 
+    // Makes a move to (lx,ly), computes coordinates to draw the corresponding X or O
+    // Checks for winning criteria for both players and finally sets the next board
     this.go = function(lx, ly) {
         this.state[this.nextBoard[0]][this.nextBoard[1]][lx][ly] = this.turn;
         var w = $("#board").width() / 3;
@@ -198,6 +216,7 @@ function TicTacToe() {
     }
 
 
+    // Highlights the board a move is to be made in
     this.highlightBoard = function() {
         var w = $("#board").width() / 3;
         var h = $("#board").height() / 3;
@@ -211,6 +230,7 @@ function TicTacToe() {
         }
     }
 
+    // Code to handle wins for turn
     this.handleWins = function(x, y, turn) {
         var w = $("#board").width() / 3;
         var h = $("#board").height() / 3;
@@ -222,8 +242,6 @@ function TicTacToe() {
             return;
         }
 
-        // local wins
-        // horizontal
         if(turn==1) {
             cxt = $("#board").get(0).getContext("2d");
             cxt.strokeStyle = "#000063";
@@ -232,6 +250,8 @@ function TicTacToe() {
             cxt = $("#board").get(0).getContext("2d");
             cxt.strokeStyle = "#CE0000";
         }
+        // local wins
+        // horizontal
         if(this.wins[x][y]==0 && board[0][0] == turn && board[1][0] == turn && board[2][0] == turn) {
             this.line(dX+12, dY + (h/3-8)/2+8, dX + w-12, dY + (h/3-8)/2+8);
             this.wins[x][y] = turn;
@@ -284,6 +304,7 @@ function TicTacToe() {
         }
     }
 
+    // check if turn has won the entire game
     this.hasWon = function(turn) {
         if((this.wins[0][0] == turn && this.wins[1][0] == turn && this.wins[2][0] == turn)
                 || (this.wins[0][1] == turn && this.wins[1][1] == turn && this.wins[2][1] == turn) 
@@ -298,6 +319,8 @@ function TicTacToe() {
         return false;
     }
 
+    // Check if a move to (x,y) is valid and make the move if it is.
+    // Else, set error messages on the associated html page
     this.move = function(x, y) {
         if(this.clickedValidBoard(x, y)) {
             if(this.clickedEmptySpace(x, y)) {
@@ -315,6 +338,7 @@ function TicTacToe() {
         return false;
     } 
 
+    // Toggles the Gambit variant setting
     this.toggleGambit = function() {
         this.useGambit = !this.useGambit;
         if(this.useGambit) {
@@ -324,6 +348,7 @@ function TicTacToe() {
         }
     }
 
+    // Toggles the AI
     this.toggleAI = function() {
         this.useAI = !this.useAI;
         if(this.useAI) {
@@ -333,6 +358,7 @@ function TicTacToe() {
         }
     }
 
+    // Toggles the difficulty setting
     this.toggleDifficulty = function() {
         if(this.difficulty==0) {
             $("#toggle_difficulty").attr("value", "Professional");
@@ -347,6 +373,8 @@ function TicTacToe() {
         }
     }
 
+    // Makes a synchronous AJAX request to the backend with the current state of the game.
+    // Backend's AI computes the next move and returns the coords in an accepted format
     this.solve = function(nextBoard) {
         var retval = [0,0,1,1];
         $.ajax({
@@ -370,6 +398,7 @@ function TicTacToe() {
         return retval;
     }
 
+    // Similar to this.go(), but to handle the AI
     this.aiGo = function() {
         var move = this.solve(this.nextBoard);
         this.nextBoard = [move[0], move[1]];
@@ -403,6 +432,7 @@ function TicTacToe() {
         this.highlightBoard();
     }
 
+    // Check if a move can be made to (x,y). If a move has been mode, check for winning conditions.
     this.handleInput = function(x, y) {
         if(!this.gameOver) {
             var moved = this.move(x, y);
@@ -442,6 +472,8 @@ function TicTacToe() {
         }
     }
 
+    // Handles the mouse click event.
+    // Calls handleInput with the coords (where the click occurred) as args
     this.handleClick = function(e) {
         var offset = $("#board").offset();
         var x = e.clientX - offset.left + $(window).scrollLeft();

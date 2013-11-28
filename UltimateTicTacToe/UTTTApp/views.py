@@ -3,6 +3,7 @@ from django.shortcuts import render_to_response
 import random
 import copy
 
+
 #Defining global variables.
 turn = 0
 state = []
@@ -12,6 +13,7 @@ nextboard = []
 playanywhere = False
 
 LARGE = 1000
+
 
 #Helper functions
 def WhoseSubBoard(board,x,y):
@@ -64,15 +66,18 @@ def WhoseSubBoard(board,x,y):
 
     return 0
 
+
 def other(t):
     """Similar to Slinky's other(turn) function"""
     if t == 1:
         return 2
     return 1
 
+
 def TwoOfThree(tl, which):
     """Returns true if 2 of the three elements in threelist are which, and the third is 0."""
     return tl.count(which) == 2 and tl.count(0) == 1
+
     
 def AlmostWonCount(board,x,y):    
     """If 2 out of 3 in any row, column or diagonal are ours, and the third is blank, add. Do the same
@@ -129,6 +134,7 @@ def AlmostWonCount(board,x,y):
 
     # print toReturn
     return toReturn 
+
     
 #Subevaluation functions. Board is a 4-D array.
 
@@ -137,7 +143,7 @@ def AlmostWonCount(board,x,y):
 def WonSubBoards(board):
     
     #The weight for this.
-    WONSB_BONUS = 10
+    WONSB_BONUS = 20
     toReturn = 0
     notwonlist = []
     for i in range(3):
@@ -152,10 +158,12 @@ def WonSubBoards(board):
 
     return (toReturn,notwonlist)
 
+
 #Are all 3 elements in threelist = 3?
 def ThreeEqual(threelist,which):
     assert len(threelist) == 3
     return threelist.count(which)==3
+
 
 #Is the game over?
 def IsGameOver(board):
@@ -212,6 +220,7 @@ def IsGameOver(board):
 
     return (False,0)
 
+
 def AlmostWonSubBoards(board,notwonlist):
 
     #The weight for this.
@@ -220,6 +229,7 @@ def AlmostWonSubBoards(board,notwonlist):
     for sb in notwonlist:
         toReturn += ALMOSTWONSB_BONUS*AlmostWonCount(board,sb[0],sb[1])
     return toReturn
+
 
 #Evaluation function.
 def Evaluate(board):
@@ -241,7 +251,9 @@ def GetEmptySquares(x,y):
                 toReturn.append([x,y,i,j])
     return toReturn
 
+
 def GetValidMoves():
+    '''Gets a list of valid moves, given the current state and turn'''
 
     global playanywhere
     if playanywhere:
@@ -253,6 +265,7 @@ def GetValidMoves():
     else:
         return GetEmptySquares(nextboard[0],nextboard[1])
 
+
 def GetEmptySquares_AB(board,x,y):
 
     toReturn = []
@@ -262,19 +275,23 @@ def GetEmptySquares_AB(board,x,y):
                 toReturn.append([x,y,i,j])
     return toReturn
 
+
 #Defining a separate GetValidMoves() for AB, because it's faster.
 #Add the play_anywhere and shit here.
 def GetValidMoves_AB(board,next_board):
     
-    if WhoseSubBoard(board,next_board[0],nextboard[1]) != 0:
+    next_board_valid = GetEmptySquares_AB(board,next_board[0], next_board[1])
+    if len(next_board_valid) == 0 or WhoseSubBoard(board,next_board[0],nextboard[1]) != 0:
         toReturn = []
         for i in range(3):
             for j in range(3):
                 toReturn.extend(GetEmptySquares_AB(board,i,j))
         return toReturn
     else:
-        return GetEmptySquares_AB(board,next_board[0],next_board[1])
+        return next_board_valid
 
+
+# The alpha-beta algorithm
 def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
 
     (gameover,winner) = IsGameOver(board)
@@ -286,7 +303,6 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
     if depth == 0:
         return Evaluate(board)
 
-    bestmove = None
     if ourturn:
         moves = GetValidMoves_AB(board,nboard)
         for move in moves:
@@ -295,7 +311,6 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
             value = AlphaBeta(newboard,depth-1,alpha,beta,False,[move[2],move[3]])
             if value > alpha:
                 alpha = value
-                bestmove = move
 
             if beta <= alpha:
                 return beta
@@ -309,23 +324,29 @@ def AlphaBeta(board, depth, alpha, beta, ourturn, nboard):
             value = AlphaBeta(newboard,depth-1,alpha,beta,True,[move[2],move[3]])
             if value < beta:
                 beta = value
-                bestmove = move
             if beta <= alpha:
                 return alpha
         return beta
+
 
 def Amateur():
     """The amateur difficulty. Random bot."""
     ValidMoves = GetValidMoves()
     r = random.randint(0,len(ValidMoves)-1)
+
+    # Preparing the move to return - [X,Y,x,y] where the first two are coords of the subboard within the board
+    # and the next two are the coords of the tic tac toe square to be played, within the (X,Y) subboard.
     toReturn = str(ValidMoves[r][0]) + ',' + str(ValidMoves[r][1]) + ',' + str(ValidMoves[r][2]) + ',' + str(ValidMoves[r][3])
     return HttpResponse(toReturn)
+
 
 def Professional():
     """The professional difficulty. Just evaluates, no lookahead."""
     ValidMoves = GetValidMoves()
     highest = -LARGE
     bestmove = None
+
+    # Iterate over all valid moves, evaluate each one of them
     for move in ValidMoves:
         newboard = copy.deepcopy(state) 
         newboard[move[0]][move[1]][move[2]][move[3]] = turn
@@ -334,17 +355,34 @@ def Professional():
             highest = value
             bestmove = move
         del newboard
+
+    # Preparing the move to return - [X,Y,x,y] where the first two are coords of the subboard within the board
+    # and the next two are the coords of the tic tac toe square to be played, within the (X,Y) subboard.
     toReturn = str(bestmove[0]) + ',' + str(bestmove[1]) + ',' + str(bestmove[2]) + ',' + str(bestmove[3])
     return HttpResponse(toReturn)
 
+
 def Legendary():
-    """The legendary difficulty. Succumb, human."""
+    """The legendary difficulty. Alpha-Beta pruning upto depth 4. Succumb, human."""
     ValidMoves = GetValidMoves()
     alpha = -LARGE
     beta = LARGE
-    bestmove = None
-    INITIAL_DEPTH = 5
+    bestmove = ValidMoves[0]
+    INITIAL_DEPTH = 4
+    i = 0
+
+    #Print statements for eval function.
+    print 'Of board we got'
+    (wsb,notwonlist) = WonSubBoards(state)
+    
+    print WhoseSubBoard(state,0,2)
+    print 'Won sub-boards bonus: ' + str(wsb)
+    print 'Almost won sub-boards bonus: ' + str(AlmostWonSubBoards(state,notwonlist))
+ 
+    # Iterate over all valid moves, and set bestmove = argmax_move(bestmove_alpha,currmove_alpha)
     for move in ValidMoves:
+        i += 1
+        print 'Looked at %d moves' % (i,)
         newboard = copy.deepcopy(state)
         newboard[move[0]][move[1]][move[2]][move[3]] = turn       
         value = AlphaBeta(newboard,INITIAL_DEPTH,alpha,beta,False,[move[2],move[3]])
@@ -353,14 +391,27 @@ def Legendary():
             bestmove = move
         del newboard
 
+    # Evaluating a few other variables to print data for logging purposes
+    newboard = copy.deepcopy(state)
+    newboard[bestmove[0]][bestmove[1]][bestmove[2]][bestmove[3]] = turn       
+    (wsb,notwonlist) = WonSubBoards(newboard)
+    print 'Of board we send'
+    print 'Won sub-boards bonus: ' + str(wsb)
+    print 'Almost won sub-boards bonus: ' + str(AlmostWonSubBoards(newboard,notwonlist))
+    del newboard
+
+    # Preparing the move to return - [X,Y,x,y] where the first two are coords of the subboard within the board
+    # and the next two are the coords of the tic tac toe square to be played, within the (X,Y) subboard.
     toReturn = str(bestmove[0]) + ',' + str(bestmove[1]) + ',' + str(bestmove[2]) + ',' + str(bestmove[3])
     return HttpResponse(toReturn)
 
 
-
+# The view that renders the homepage
 def home(request):
     return render_to_response('index.html', locals())
 
+
+# The view to which the AJAX GET request is made
 def getMove(request):
 
     # data being received:
@@ -371,13 +422,14 @@ def getMove(request):
     # nextBoard - the large grid in which the move is to be played (x,y)
     # X is from L to R, Y is from top to bottom.
 
-    # Testing GET
+    # Populating local data structures
+    # with received data
     global turn
     global state
     global wins
     global nextboard
     global playanywhere
-    turn = request.GET["turn"]
+    turn = int(request.GET["turn"])
     if "nextBoard[]" not in request.GET.keys():
         playanywhere = True
     else:
@@ -397,6 +449,8 @@ def getMove(request):
     for i in range(3):
         argstring = "wins[" + str(i) + "][]"
         wins.append([int(a) for a in request.GET.getlist(argstring)])
+
+    # Choose bot based on difficulty setting
     diff = int(request.GET["difficulty"])
     if diff == 0:
         return Amateur()
